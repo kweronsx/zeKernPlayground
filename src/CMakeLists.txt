@@ -9,7 +9,7 @@ file(MAKE_DIRECTORY ${gKernTimelineOutDir})
 add_custom_target(ztKernTimelines) # ze_tracer timelines
 add_custom_target(utKernTimelines) # unitrace timelines
 
-function(addKernelTest binaryFile sourceFile timelinePrefix)
+function(addKernelTest binaryFile sourceFile)
 	set(kernTimelineOutDir ${gKernTimelineOutDir}/${binaryFile})
 	file(MAKE_DIRECTORY ${kernTimelineOutDir})
 
@@ -48,7 +48,8 @@ add_custom_target(reKernTimelines
 		DEPENDS utKernTimelines
 		DEPENDS ztKernTimelines)
 
-addKernelTest(k2q2b k2q2b.cpp k2q2b) # 2 kernels, 2 queues, uses sycl buffers
-addKernelTest(k2q2p k2q2p.cpp k2q2p) # 2 kernels, 2 queues, uses USM pointers
-addKernelTest(k3q3b k3q3b.cpp k3q3b) # 3 kernels, 3 queues, uses sycl buffers
-addKernelTest(k3q3p k3q3p.cpp k3q3p) # 3 kernels, 3 queues, uses USM pointers
+addKernelTest(k2q2b k2q2b.cpp) # 2 kernels, 2 queues, uses sycl buffers
+addKernelTest(k2q2p k2q2p.cpp) # 2 kernels, 2 queues, uses USM pointers
+addKernelTest(k3q3b k3q3b.cpp) # 3 kernels, 3 queues, uses sycl buffers
+addKernelTest(k3q3p k3q3p.cpp) # 3 kernels, 3 queues, uses USM pointers
+addKernelTest(k2kdq3b k2kdq3b.cpp) # 3 kernels (1 dummy), 3 queues, uses buffers
