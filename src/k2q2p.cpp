@@ -68,8 +68,9 @@ int VectorAdd(sycl::queue &q1, sycl::queue &q2, std::vector<int> &a,
 int main() {
   try {
     // Create SYCL queues
-    sycl::queue q1(sycl::default_selector_v);
-    sycl::queue q2(q1.get_context(), sycl::default_selector_v);
+    sycl::property_list p{sycl::property::queue::enable_profiling()};
+    sycl::queue q1(sycl::default_selector_v, p);
+    sycl::queue q2(q1.get_context(), sycl::default_selector_v, p);
 
     int array_size = 100000;
     int iter = 100;

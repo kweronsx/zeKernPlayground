@@ -106,9 +106,10 @@ int main() {
     // sycl::queue q2(q1.get_context(), sycl::default_selector_v, q_prop);
     // sycl::queue q3(q1.get_context(), sycl::default_selector_v, q_prop);
 
-    sycl::queue q1(sycl::default_selector_v);
-    sycl::queue q2(q1.get_context(), sycl::default_selector_v);
-    sycl::queue q3(q1.get_context(), sycl::default_selector_v);
+    sycl::property_list p{sycl::property::queue::enable_profiling()};
+    sycl::queue q1(sycl::default_selector_v, p);
+    sycl::queue q2(q1.get_context(), sycl::default_selector_v, p);
+    sycl::queue q3(q1.get_context(), sycl::default_selector_v, p);
 
     int array_size = 100000;
     int iter = 100;
