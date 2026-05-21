@@ -5,25 +5,23 @@
 #include <thread>
 #include <vector>
 
-int VectorAdd(sycl::queue &q1, sycl::queue &q2, sycl::queue &q3,
-              std::vector<int> &a, std::vector<int> &b, int iter,
-              int array_size) {
+int VectorAdd(sycl::queue &q1, sycl::queue &q2, std::vector<int> &a,
+              std::vector<int> &b, int iter, int array_size) {
 
   sycl::buffer a_buf(a);
   sycl::buffer b_buf(b);
-  sycl::buffer<int> *sum_buf[3 * iter];
-  for (size_t i = 0; i < (3 * iter); i++)
+  sycl::buffer<int> *sum_buf[2 * iter];
+  for (size_t i = 0; i < (2 * iter); i++)
     sum_buf[i] = new sycl::buffer<int>(256);
 
   size_t num_groups = 1;
   size_t wg_size = 256;
   auto start = std::chrono::steady_clock::now();
   for (int i = 0; i < iter; i++) {
-
     q1.submit([&](auto &h) {
       sycl::accessor a_acc(a_buf, h, sycl::read_only);
       sycl::accessor b_acc(b_buf, h, sycl::read_only);
-      auto sum_acc = sum_buf[3 * i]->get_access<sycl::access::mode::write>(h);
+      auto sum_acc = sum_buf[2 * i]->get_access<sycl::access::mode::write>(h);
 
       h.parallel_for(sycl::nd_range<1>(num_groups * wg_size, wg_size),
                      [=](sycl::nd_item<1> index) {
@@ -34,25 +32,12 @@ int VectorAdd(sycl::queue &q1, sycl::queue &q2, sycl::queue &q3,
                        }
                      });
     });
-
-    // h.parallel_for(sycl::nd_range<1>(num_groups * wg_size, wg_size),
-    //                 [=](sycl::nd_item<1> index) {
-    //                 size_t loc_id = index.get_local_id();
-    //                 sum_acc[loc_id] = 0;
-    //                 for (int j = 0; j < 1000; j++) {
-    //                     for (size_t i = loc_id; i < array_size; i += wg_size)
-    //                     {
-    //                         sum_acc[loc_id] += a_acc[i] *j + b_acc[i];
-    //                     }
-    //                 }
-    //                 });
-    // });
-
     q2.submit([&](auto &h) {
       sycl::accessor a_acc(a_buf, h, sycl::read_only);
+      sycl::accessor a2_acc(a_buf, h, sycl::read_only);
       sycl::accessor b_acc(b_buf, h, sycl::read_only);
       auto sum_acc =
-          sum_buf[3 * i + 1]->get_access<sycl::access::mode::write>(h);
+          sum_buf[2 * i + 1]->get_access<sycl::access::mode::write>(h);
 
       h.parallel_for(sycl::nd_range<1>(num_groups * wg_size, wg_size),
                      [=](sycl::nd_item<1> index) {
@@ -62,20 +47,15 @@ int VectorAdd(sycl::queue &q1, sycl::queue &q2, sycl::queue &q3,
                          sum_acc[loc_id] += a_acc[i] + b_acc[i];
                        }
                      });
-    });
-
-    q3.submit([&](auto &h) {
-			sycl::accessor a_acc(a_buf, h, sycl::read_only);
     });
   }
   q1.wait();
   q2.wait();
-  q3.wait();
   auto end = std::chrono::steady_clock::now();
   std::cout << "Vector add completed on device - took " << (end - start).count()
             << " u-secs\n";
   // check results
-  for (size_t i = 0; i < (3 * iter); i++)
+  for (size_t i = 0; i < (2 * iter); i++)
     delete sum_buf[i];
   return ((end - start).count());
 } // end VectorAdd
@@ -83,15 +63,9 @@ int VectorAdd(sycl::queue &q1, sycl::queue &q2, sycl::queue &q3,
 int main() {
   try {
     // Create SYCL queues
-    // sycl::property_list q_prop{sycl::property::queue::in_order()};
-    // sycl::queue q1(sycl::default_selector_v, q_prop);
-    // sycl::queue q2(q1.get_context(), sycl::default_selector_v, q_prop);
-    // sycl::queue q3(q1.get_context(), sycl::default_selector_v, q_prop);
-
     sycl::property_list p{sycl::property::queue::enable_profiling()};
     sycl::queue q1(sycl::default_selector_v, p);
     sycl::queue q2(q1.get_context(), sycl::default_selector_v, p);
-    sycl::queue q3(q1.get_context(), sycl::default_selector_v, p);
 
     int array_size = 100000;
     int iter = 100;
@@ -121,7 +95,7 @@ int main() {
               << std::endl;
 
     // Call the VectorAdd function
-    int execution_time = VectorAdd(q1, q2, q3, a, b, iter, array_size);
+    int execution_time = VectorAdd(q1, q2, a, b, iter, array_size);
 
     std::cout << "Total execution time: " << execution_time << " microseconds"
               << std::endl;

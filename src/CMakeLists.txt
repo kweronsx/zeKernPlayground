@@ -26,7 +26,8 @@ function(addKernelTest binaryFile sourceFile)
 	add_custom_target(${binaryFile}TimelineZT
 										 COMMAND LD_LIBRARY_PATH=${CMAKE_BUILD_RPATH}
 										 UR_L0_V2_DISABLE_ZE_LAUNCH_KERNEL_WITH_ARGS=1 ze_tracer
-										 --chrome-kernel-timeline ${CMAKE_CURRENT_BINARY_DIR}/${binaryFile}
+										 --chrome-kernel-timeline
+										 ${CMAKE_CURRENT_BINARY_DIR}/${binaryFile}
 										 WORKING_DIRECTORY ${kernTimelineOutDir}
 										 DEPENDS ${binaryFile}
 										 COMMENT "Generating ze_tracer timeline file for ${binaryFile}")
@@ -35,7 +36,8 @@ function(addKernelTest binaryFile sourceFile)
 
 	add_custom_target(${binaryFile}TimelineUT
 										 COMMAND LD_LIBRARY_PATH=${CMAKE_BUILD_RPATH} unitrace
-										 --chrome-kernel-logging ${CMAKE_CURRENT_BINARY_DIR}/${binaryFile}
+										 --chrome-call-logging --chrome-kernel-logging
+										 ${CMAKE_CURRENT_BINARY_DIR}/${binaryFile}
 										 WORKING_DIRECTORY ${kernTimelineOutDir}
 										 DEPENDS ${binaryFile}
 										 COMMENT "Generating unitrace timeline file for ${binaryFile}")
@@ -53,3 +55,4 @@ addKernelTest(k2q2p k2q2p.cpp) # 2 kernels, 2 queues, uses USM pointers
 addKernelTest(k3q3b k3q3b.cpp) # 3 kernels, 3 queues, uses sycl buffers
 addKernelTest(k3q3p k3q3p.cpp) # 3 kernels, 3 queues, uses USM pointers
 addKernelTest(k2kdq3b k2kdq3b.cpp) # 3 kernels (1 dummy), 3 queues, uses buffers
+addKernelTest(k2q2a2b k2q2a2b.cpp) # 2 kernels, 2 a_acc in kern 2, uses buffers
