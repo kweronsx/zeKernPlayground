@@ -50,9 +50,26 @@ add_custom_target(reKernTimelines
 		DEPENDS utKernTimelines
 		DEPENDS ztKernTimelines)
 
+# runs sequentially
 addKernelTest(k2q2b k2q2b.cpp) # 2 kernels, 2 queues, uses sycl buffers
+
+# runs sequentially
 addKernelTest(k2q2p k2q2p.cpp) # 2 kernels, 2 queues, uses USM pointers
+
+# runs in parallel
 addKernelTest(k3q3b k3q3b.cpp) # 3 kernels, 3 queues, uses sycl buffers
+
+# runs in parallel
 addKernelTest(k3q3p k3q3p.cpp) # 3 kernels, 3 queues, uses USM pointers
+
+# runs in parallel
 addKernelTest(k2kdq3b k2kdq3b.cpp) # 3 kernels (1 dummy), 3 queues, uses buffers
+
+# runs in parallel
 addKernelTest(k2q2a2b k2q2a2b.cpp) # 2 kernels, 2 a_acc in kern 2, uses buffers
+
+# runs sequentially
+addKernelTest(k2q2oab k2q2oab.cpp) # only buffer buffer a
+
+# runs in parallel
+addKernelTest(k2q2oa2b k2q2oa2b.cpp) # only buffer a but 2 accessors in kern 2
